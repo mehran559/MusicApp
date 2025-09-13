@@ -17,6 +17,8 @@
   <allow-intent href="https://heartquotelabs.netlify.app/*" />
   <allow-navigation href="https://heartquotelabs.netlify.app/*" />
 
+    <plugin name="cordova-plugin-device" source="npm" />
+    <plugin name="cordova-plugin-statusbar" source="npm" />
     <plugin name="cordova-plugin-media" source="npm" />
     <plugin name="cordova-plugin-file" source="npm" />
     <plugin name="cordova-plugin-background-mode" source="npm" />
@@ -75,4 +77,3 @@
     <engine name="android" spec="9.1.0" />
     <engine name="browser" spec="6.0.0" />
 </widget>
-              
