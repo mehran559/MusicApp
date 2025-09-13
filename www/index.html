@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Harmony Player</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            width: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+ 
+        
+        .player-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .album-art {
+            width: 220px;
+            height: 220px;
+            margin: 0 auto 25px;
+            border-radius: 50%;
+            background: #333;
+            overflow: hidden;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+            position: relative;
+            animation: rotate 20s linear infinite;
+            animation-play-state: paused;
+        }
+        
+        .album-art.playing {
+            animation-play-state: running;
+        }
+        
+        @keyframes rotate {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .album-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .album-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #3494E6, #EC6EAD);
+            color: white;
+            font-size: 50px;
+        }
+        
+        .song-info {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .song-title {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .song-artist {
+            font-size: 18px;
+            opacity: 0.8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            margin-bottom: 15px;
+            cursor: crosshair;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background: linear-gradient(to right, #ff9966, #ff5e62);
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.1s ease;
+        }
+        
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 25px;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: crosshair;
+            font-size: 18px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            transition: all 0.2s ease;
+        }
+        
+        .btn:active {
+            transform: scale(0.95);
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .play-btn {
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .access-btn {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 12px 20px;
+            border-radius: 30px;
+            margin-top: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+        }
+        
+        .volume-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .volume-slider {
+            flex: 1;
+            -webkit-appearance: none;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            outline: none;
+        }
+        
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: white;
+            cursor: crosshair;
+        }
+        
+        .playlist {
+            flex: 1;
+            overflow-y: auto;
+            max-height: 200px;
+            margin-top: 10px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+        }
+        
+        .playlist-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: crosshair;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .playlist-item:last-child {
+            border-bottom: none;
+        }
+        
+        .playlist-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .playlist-item.playing {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ff9966;
+        }
+        
+        .playlist-item .play-icon {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+        
+        .playlist-item .song-details {
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .playlist-item .title {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 14px;
+        }
+        
+        .playlist-item .artist {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+            opacity: 0.7;
+        }
+        
+        .status-message {
+            text-align: center;
+            padding: 10px;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            font-size: 14px;
+            opacity: 0.7;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 500px) {
+            .album-art {
+                width: 180px;
+                height: 180px;
+            }
+            
+            .controls {
+                gap: 15px;
+            }
+            
+            .btn {
+                width: 45px;
+                height: 45px;
+            }
+            
+            .play-btn {
+                width: 55px;
+                height: 55px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <div class="player-card">
+            <div class="album-art" id="albumArt">
+                <div class="album-placeholder">♪</div>
+            </div>
+            
+            <div class="song-info">
+                <div class="song-title" id="songTitle">Access your music library</div>
+                <div class="song-artist" id="songArtist">Tap the button below</div>
+                <div class="status-message" id="statusMessage"></div>
+            </div>
+            
+            <div class="progress-container" id="progressContainer">
+                <div class="progress" id="progress"></div>
+            </div>
+            
+            <div class="time-display">
+                <span id="currentTime">0:00</span>
+                <span id="duration">0:00</span>
+            </div>
+            
+            <div class="controls">
+                <button class="btn" id="prevBtn" disabled>⏮</button>
+                <button class="btn play-btn" id="playBtn" disabled>▶</button>
+                <button class="btn" id="nextBtn" disabled>⏭</button>
+            </div>
+            
+            <button class="btn access-btn" id="accessBtn">
+                <span>📁</span> </button>
+            
+            <div class="volume-container">
+                <span>🔈</span>
+                <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.01" value="0.7">
+                <span>🔊</span>
+            </div>
+            
+            <div class="playlist" id="playlist">
+                <div class="loading">Your music will appear here</div>
+            </div>
+        </div>
+    </div>
+<script src="cordova.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const albumArt = document.getElementById('albumArt');
+            const songTitle = document.getElementById('songTitle');
+            const songArtist = document.getElementById('songArtist');
+            const statusMessage = document.getElementById('statusMessage');
+            const progressContainer = document.getElementById('progressContainer');
+            const progress = document.getElementById('progress');
+            const currentTimeEl = document.getElementById('currentTime');
+            const durationEl = document.getElementById('duration');
+            const playBtn = document.getElementById('playBtn');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const accessBtn = document.getElementById('accessBtn');
+            const volumeSlider = document.getElementById('volumeSlider');
+            const playlistEl = document.getElementById('playlist');
+            
+            // Audio context
+            let media = null;
+            let isPlaying = false;
+            let currentSongIndex = 0;
+            let musicList = [];
+            let mediaTimer = null;
+            
+            // Initialize the player
+            function initPlayer() {
+                // Event listeners
+                playBtn.addEventListener('click', togglePlay);
+                prevBtn.addEventListener('click', prevSong);
+                nextBtn.addEventListener('click', nextSong);
+                accessBtn.addEventListener('click', accessMusicLibrary);
+                progressContainer.addEventListener('click', setProgress);
+                volumeSlider.addEventListener('input', setVolume);
+                
+                // Initially disable buttons until music is loaded
+                playBtn.disabled = true;
+                prevBtn.disabled = true;
+                nextBtn.disabled = true;
+            }
+            
+            // Load a song
+            function loadSong(index) {
+                if (musicList.length === 0) return;
+                
+                const song = musicList[index];
+                
+                songTitle.textContent = song.title || 'Unknown Title';
+                songArtist.textContent = song.artist || 'Unknown Artist';
+                
+                // Release previous media object if exists
+                if (media) {
+                    media.stop();
+                    media.release();
+                    media = null;
+                }
+                
+                // Clear any existing timer
+                if (mediaTimer) {
+                    clearInterval(mediaTimer);
+                    mediaTimer = null;
+                }
+                
+                // Create new media object
+                media = new Media(
+                    song.src,
+                    function() {
+                        console.log("Playback finished");
+                        nextSong();
+                    },
+                    function(err) {
+                        console.log("Playback error: " + JSON.stringify(err));
+                        statusMessage.textContent = "Playback error: " + err;
+                    }
+                );
+                
+                // Set album art
+                if (song.image) {
+                    const img = new Image();
+                    img.src = song.image;
+                    img.classList.add('album-image');
+                    albumArt.innerHTML = '';
+                    albumArt.appendChild(img);
+                } else {
+                    albumArt.innerHTML = '<div class="album-placeholder">♪</div>';
+                }
+                
+                // Reset progress
+                progress.style.width = '0%';
+                currentTimeEl.textContent = '0:00';
+                durationEl.textContent = '0:00';
+                
+                // Update active item in playlist
+                const playlistItems = playlistEl.querySelectorAll('.playlist-item');
+                playlistItems.forEach((item, idx) => {
+                    if (idx === index) {
+                        item.classList.add('playing');
+                    } else {
+                        item.classList.remove('playing');
+                    }
+                });
+            }
+            
+            // Generate playlist
+            function generatePlaylist() {
+                playlistEl.innerHTML = '';
+                
+                if (musicList.length === 0) {
+                    playlistEl.innerHTML = '<div class="loading">No music found</div>';
+                    return;
+                }
+                
+                musicList.forEach((song, index) => {
+                    const item = document.createElement('div');
+                    item.classList.add('playlist-item');
+                    if (index === currentSongIndex) {
+                        item.classList.add('playing');
+                    }
+                    
+                    item.innerHTML = `
+                        <div class="play-icon">${index === currentSongIndex ? '▶' : ''}</div>
+                        <div class="song-details">
+                            <div class="title">${song.title || 'Unknown Title'}</div>
+                            <div class="artist">${song.artist || 'Unknown Artist'}</div>
+                        </div>
+                    `;
+                    
+                    item.addEventListener('click', () => {
+                        currentSongIndex = index;
+                        loadSong(currentSongIndex);
+                        playSong();
+                    });
+                    
+                    playlistEl.appendChild(item);
+                });
+            }
+            
+            // Play song
+            function playSong() {
+                if (!media) return;
+                
+                isPlaying = true;
+                playBtn.textContent = '⏸';
+                albumArt.classList.add('playing');
+                media.play();
+                
+                // Start timer to update progress
+                mediaTimer = setInterval(updateProgress, 500);
+                
+                // Update playlist icon
+                const playlistItems = playlistEl.querySelectorAll('.playlist-item');
+                playlistItems.forEach((item, idx) => {
+                    const icon = item.querySelector('.play-icon');
+                    if (idx === currentSongIndex) {
+                        icon.textContent = '▶';
+                    } else {
+                        icon.textContent = '';
+                    }
+                });
+            }
+            
+            // Pause song
+            function pauseSong() {
+                if (!media) return;
+                
+                isPlaying = false;
+                playBtn.textContent = '▶';
+                albumArt.classList.remove('playing');
+                media.pause();
+                
+                // Clear progress timer
+                if (mediaTimer) {
+                    clearInterval(mediaTimer);
+                    mediaTimer = null;
+                }
+                
+                // Update playlist icon
+                const playlistItems = playlistEl.querySelectorAll('.playlist-item');
+                playlistItems.forEach(item => {
+                    const icon = item.querySelector('.play-icon');
+                    icon.textContent = '';
+                });
+            }
+            
+            // Toggle play/pause
+            function togglePlay() {
+                if (isPlaying) {
+                    pauseSong();
+                } else {
+                    playSong();
+                }
+            }
+            
+            // Previous song
+            function prevSong() {
+                if (musicList.length === 0) return;
+                
+                currentSongIndex--;
+                if (currentSongIndex < 0) {
+                    currentSongIndex = musicList.length - 1;
+                }
+                loadSong(currentSongIndex);
+                playSong();
+            }
+            
+            // Next song
+            function nextSong() {
+                if (musicList.length === 0) return;
+                
+                currentSongIndex++;
+                if (currentSongIndex > musicList.length - 1) {
+                    currentSongIndex = 0;
+                }
+                loadSong(currentSongIndex);
+                playSong();
+            }
+            
+            // Update progress bar
+            function updateProgress() {
+                if (media) {
+                    media.getCurrentPosition(
+                        function(position) {
+                            if (position > -1) {
+                                // Update progress width (approximate since we don't have duration)
+                                progress.style.width = `${position % 100}%`;
+                                
+                                // Update time display
+                                const currentMinutes = Math.floor(position / 60);
+                                const currentSeconds = Math.floor(position % 60);
+                                currentTimeEl.textContent = `${currentMinutes}:${currentSeconds < 10 ? '0' : ''}${currentSeconds}`;
+                                
+                                // For demo purposes, set a fake duration
+                                durationEl.textContent = '3:45';
+                            }
+                        },
+                        function(e) {
+                            console.log("Error getting position: " + e);
+                        }
+                    );
+                }
+            }
+            
+            // Set progress when clicking on progress bar
+            function setProgress(e) {
+                if (!media || musicList.length === 0) return;
+                
+                const width = this.clientWidth;
+                const clickX = e.offsetX;
+                const percent = clickX / width;
+                
+                // Seek to position (approximate since we don't have duration)
+                media.seekTo(percent * 1000 * 60); // Assuming 1 minute duration for demo
+            }
+            
+            // Set volume
+            function setVolume() {
+                if (media) {
+                    media.setVolume(volumeSlider.value);
+                }
+            }
+            
+            // Check if file is a music file
+            function isMusicFile(filename) {
+                return filename.match(/\.(mp3|wav|ogg|m4a|aac|flac)$/i);
+            }
+            
+            // Extract title from filename
+            function getTitleFromFilename(filename) {
+                return filename.replace(/\.[^/.]+$/, "").replace(/[-_]/g, ' ');
+            }
+            
+            // Access device music library
+            // Modified accessMusicLibrary function for Cordova Android
+function accessMusicLibrary() {
+    statusMessage.textContent = "Requesting permissions...";
+    
+    // For Android, we need to use the built-in permission API
+    if (typeof cordova !== 'undefined' && device.platform === 'Android') {
+        // Request READ_EXTERNAL_STORAGE permission
+        var permissions = cordova.plugins.permissions;
+        var permission = "android.permission.READ_EXTERNAL_STORAGE";
+        
+        permissions.checkPermission(permission, function(status) {
+            if (status.hasPermission) {
+                statusMessage.textContent = "Permission granted. Scanning for music...";
+                scanForMusic();
+            } else {
+                permissions.requestPermission(permission, function(status) {
+                    if (status.hasPermission) {
+                        statusMessage.textContent = "Permission granted. Scanning for music...";
+                        scanForMusic();
+                    } else {
+                        statusMessage.textContent = "Permission denied. Cannot access music files.";
+                        console.log("Permission denied");
+                        // Fallback to demo music
+                        loadDemoMusic();
+                    }
+                }, function(error) {
+                    statusMessage.textContent = "Error requesting permission.";
+                    console.log("Error requesting permission: " + error);
+                    // Fallback to demo music
+                    loadDemoMusic();
+                });
+            }
+        }, function(error) {
+            statusMessage.textContent = "Error checking permission.";
+            console.log("Error checking permission: " + error);
+            // Fallback to demo music
+            loadDemoMusic();
+        });
+    } else {
+        // For other platforms or in browser, use demo music
+        statusMessage.textContent = "Scanning for music...";
+        setTimeout(loadDemoMusic, 2000);
+    }
+}
+            
+            // Scan device for music files
+            function scanForMusic() {
+                statusMessage.textContent = "Scanning device for music files...";
+                musicList = [];
+                
+                // Define music directories to scan
+                const musicDirectories = [
+                    cordova.file.externalRootDirectory + "Music/",
+                    cordova.file.externalRootDirectory + "Download/",
+                    cordova.file.externalRootDirectory + "DCIM/",
+                    cordova.file.externalRootDirectory
+                ];
+                
+                let directoriesScanned = 0;
+                
+                musicDirectories.forEach(function(directory) {
+                    window.resolveLocalFileSystemURL(
+                        directory,
+                        function(fileSystem) {
+                            var reader = fileSystem.createReader();
+                            reader.readEntries(
+                                function(entries) {
+                                    processMusicFiles(entries, 0, function() {
+                                        directoriesScanned++;
+                                        if (directoriesScanned === musicDirectories.length) {
+                                            finishScan();
+                                        }
+                                    });
+                                },
+                                function(error) {
+                                    console.log("Error reading directory: " + JSON.stringify(error));
+                                    directoriesScanned++;
+                                    if (directoriesScanned === musicDirectories.length) {
+                                        finishScan();
+                                    }
+                                }
+                            );
+                        },
+                        function(error) {
+                            console.log("Error accessing directory: " + JSON.stringify(error));
+                            directoriesScanned++;
+                            if (directoriesScanned === musicDirectories.length) {
+                                finishScan();
+                            }
+                        }
+                    );
+                });
+            }
+            
+            // Process found music files
+            function processMusicFiles(entries, index, callback) {
+                if (index >= entries.length) {
+                    callback();
+                    return;
+                }
+                
+                var entry = entries[index];
+                if (entry.isDirectory) {
+                    window.resolveLocalFileSystemURL(
+                        entry.nativeURL,
+                        function(dir) {
+                            var reader = dir.createReader();
+                            reader.readEntries(
+                                function(subEntries) {
+                                    processMusicFiles(subEntries, 0, function() {
+                                        processMusicFiles(entries, index + 1, callback);
+                                    });
+                                },
+                                function(error) {
+                                    console.log("Error reading subdirectory: " + JSON.stringify(error));
+                                    processMusicFiles(entries, index + 1, callback);
+                                }
+                            );
+                        },
+                        function(error) {
+                            console.log("Error accessing subdirectory: " + JSON.stringify(error));
+                            processMusicFiles(entries, index + 1, callback);
+                        }
+                    );
+                } else {
+                    if (isMusicFile(entry.name)) {
+                        musicList.push({
+                            title: getTitleFromFilename(entry.name),
+                            artist: 'Unknown Artist',
+                            src: entry.nativeURL,
+                            image: null
+                        });
+                    }
+                    processMusicFiles(entries, index + 1, callback);
+                }
+            }
+            
+            // Finish scanning and update UI
+            function finishScan() {
+                if (musicList.length > 0) {
+                    statusMessage.textContent = "Found " + musicList.length + " music files";
+                    
+                    // Enable buttons
+                    playBtn.disabled = false;
+                    prevBtn.disabled = false;
+                    nextBtn.disabled = false;
+                    
+                    // Update UI
+                    accessBtn.style.display = 'none';
+                    generatePlaylist();
+                    loadSong(0);
+                    
+                    songTitle.textContent = 'Tap play to start';
+                    songArtist.textContent = `${musicList.length} songs loaded`;
+                } else {
+                    statusMessage.textContent = "No music files found. Loading demo songs.";
+                    loadDemoMusic();
+                }
+            }
+            
+            // Load demo music if no device music found
+            function loadDemoMusic() {
+                musicList = [
+                    {
+                        title: 'Ambient Light',
+                        artist: 'Soundscape',
+                        src: 'https://cdn.pixabay.com/download/audio/2022/01/20/audio_5e6f4320a5.mp3?filename=ambient-piano-amp-strings-117112.mp3',
+                        image: 'https://picsum.photos/seed/ambient/300/300'
+                    },
+                    {
+                        title: 'Electronic Inspiration',
+                        artist: 'Synth Wave',
+                        src: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_5c4dc48e6c.mp3?filename=electronic-inspiration-117200.mp3',
+                        image: 'https://picsum.photos/seed/electronic/300/300'
+                    }
+                ];
+                
+                // Enable buttons
+                playBtn.disabled = false;
+                prevBtn.disabled = false;
+                nextBtn.disabled = false;
+                
+                // Update UI
+                accessBtn.style.display = 'none';
+                generatePlaylist();
+                loadSong(0);
+                
+                statusMessage.textContent = "Playing demo songs";
+                songTitle.textContent = 'Tap play to start';
+                songArtist.textContent = `${musicList.length} songs loaded`;
+            }
+            
+            // Initialize the player
+            initPlayer();
+            
+            // Cordova specific code (will only run in Cordova environment)
+            document.addEventListener('deviceready', function() {
+                console.log('Cordova is ready');
+                statusMessage.textContent = "You can access your music library.";
+                
+                // For example, request permissions for audio playback in background
+                if (cordova.plugins.backgroundMode) {
+                    cordova.plugins.backgroundMode.enable();
+                    cordova.plugins.backgroundMode.on('activate', function() {
+                        cordova.plugins.backgroundMode.disableWebViewOptimizations();
+                    });
+                }
+            }, false);
+        });
+    </script>
+</body>
+</html>
