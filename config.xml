@@ -1,1 +1,78 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.heartquote.test" android-versionCode="100" version="1.0.0"  
+  xmlns="http://www.w3.org/ns/widgets" 
+  xmlns:android="http://schemas.android.com/apk/res/android" 
+  xmlns:cdv="http://cordova.apache.org/ns/1.0">
+ 
+    <name>Test App</name>
+    <content src="index.html" />
+    <access origin="*" />
+    <allow-intent href="http://*/*" />
+    <allow-intent href="https://*/*" />
+    <allow-intent href="tel:*" />
+    <allow-intent href="sms:*" />
+    <allow-intent href="mailto:*" />
+    <allow-intent href="geo:*" />
+    
+  <allow-intent href="https://heartquotelabs.netlify.app/*" />
+  <allow-navigation href="https://heartquotelabs.netlify.app/*" />
 
+    <plugin name="cordova-plugin-media" source="npm" />
+    <plugin name="cordova-plugin-file" source="npm" />
+    <plugin name="cordova-plugin-background-mode" source="npm" />
+    <!-- AdMob Plus Plugin 
+    <plugin name="admob-plus-cordova" source="npm">
+   <variable name="APP_ID_ANDROID"  value="ca-app-pub-5188642994982403~8161137954" />
+    </plugin>
+        <preference name="AdMobAppId" value="ca-app-pub-5188642994982403~8161137954"  />
+        <preference name="AdMobPlusWebViewAd" value="true" />
+ -->
+       <platform name="android">
+        <preference name="android-minSdkVersion" value="21" />
+        <preference name="android-targetSdkVersion" value="35" />
+        <preference name="android-compileSdkVersion" value="35" />
+        <preference name="android-buildToolsVersion" value="35.0.0" />
+        <preference name="AndroidXEnabled" value="true" />
+        <preference name="GradlePluginKotlinEnabled" value="true" />
+
+        <allow-intent href="market:*" />
+
+     <!-- Internet Permissions -->
+ <config-file target="AndroidManifest.xml" parent="/*">
+            <uses-permission android:name="android.permission.INTERNET" />
+            <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+            <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+            <uses-permission android:name="android.permission.WAKE_LOCK" />
+            <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+            <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+            <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+        </config-file>
+        
+        <!-- Background Mode Configuration -->
+        <config-file target="AndroidManifest.xml" parent="application">
+            <service android:name="de.appplant.cordova.plugin.background.ForegroundService" />
+        </config-file>
+        
+
+        <icon src="www/logo.png" />
+        <preference name="AndroidWindowSplashScreenAnimatedIcon" value="www/logo1.png" />
+        <preference name="AndroidWindowSplashScreenBackgroundColor" value="#000000" />
+        <preference name="FadeSplashScreen" value="false"/>
+        <preference name="AndroidWindowSplashScreenIconBackgroundColor" value="#c0c0c0" />
+        <preference name="AndroidWindowSplashScreenDuration" value="100" />
+        <preference name="StatusBarBackgroundColor" value="#000000" />
+
+        
+    </platform>
+    <platform name="ios">
+        <allow-intent href="itms:*" />
+        <allow-intent href="itms-apps:*" />
+        <preference name="deployment-target" value="11.0" />
+        <preference name="SwiftVersion" value="5.3" />
+    </platform>
+
+    <engine name="ios" spec="6.2.0" />
+    <engine name="android" spec="9.1.0" />
+    <engine name="browser" spec="6.0.0" />
+</widget>
+              
