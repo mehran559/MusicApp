@@ -1,1 +1,67 @@
+name: Android Build
 
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install Cordova
+        run: npm install -g cordova && npm update -g cordova
+
+
+      - name: Install Dependencies
+        run:  npm install && npm update
+
+      - name: Remove & Add Android Platform
+        run:  cordova platform add android@latest
+
+      - name: Install Device plugin
+        run: cordova plugin add cordova-plugin-device
+        
+      - name: Install Media plugin
+        run: cordova plugin add cordova-plugin-media
+        
+      - name: Install Statusbar Plugin
+        run: cordova plugin add cordova-plugin-statusbar
+
+      - name: Add plugin file
+        run: cordova plugin add cordova-plugin-file
+        
+      - name: Add plugin background
+        run:  cordova plugin add cordova-plugin-background-mode
+
+      - name: Update Plugin 
+        run: cordova plugin update
+
+      - name: Check plugin version 
+        run: cordova plugin list
+
+      - name: Build Debug APK
+        run: cordova build android --debug --verbose
+
+      - name: Build Release APK
+        run: cordova build android --release --verbose
+
+      - name: Upload APK Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-apks
+          path: |
+            platforms/android/app/build/outputs/apk/debug/app-debug.apk
+            platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
