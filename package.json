@@ -1,1 +1,4 @@
-
+{ "name": "Test App",
+  "version": "1.0.0",
+  "description": "Urdu shayari and Novels",
+  "dependencies": { "cordova": "^12.0.0" } }
